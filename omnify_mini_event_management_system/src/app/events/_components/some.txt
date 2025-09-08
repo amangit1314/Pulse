@@ -1,0 +1,109 @@
+{/* <div className="space-y-4">
+          {/* Event Name */}
+          <div>
+            <Label className={`mb-2 ${spaceGrotesk.className}`}>
+              Event Name
+            </Label>
+            <Input
+              placeholder="Enter event name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="rounded-xl"
+            />
+          </div>
+
+          {/* Max Capacity */}
+          <div>
+            <Label className={`mb-2 ${spaceGrotesk.className}`}>
+              Max Capacity
+            </Label>
+            <Input
+              type="number"
+              min={1}
+              value={capacity}
+              onChange={(e) => setCapacity(Number(e.target.value))}
+              className="rounded-xl"
+            />
+          </div>
+
+          {/* Location Picker */}
+          <div>
+            <Label className={`mb-2 ${spaceGrotesk.className}`}>Location</Label>
+            <Select value={location} onValueChange={setLocation}>
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Select a city" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Bangalore">Bangalore</SelectItem>
+                <SelectItem value="Mumbai">Mumbai</SelectItem>
+                <SelectItem value="Delhi">Delhi</SelectItem>
+                <SelectItem value="Hyderabad">Hyderabad</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Start Time */}
+          <div>
+            <Label className={`mb-2 ${spaceGrotesk.className}`}>
+              Start Time
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start rounded-xl"
+                >
+                  {startDate ? format(startDate, "PPpp") : "Pick start time"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* End Time */}
+          <div>
+            <Label className={`mb-2 ${spaceGrotesk.className}`}>End Time</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start rounded-xl"
+                >
+                  {endDate ? format(endDate, "PPpp") : "Pick end time"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className={`rounded-xl ${spaceGrotesk.className}`}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddEvent}
+              className={`rounded-xl bg-indigo-600 hover:bg-indigo-700 ${spaceGrotesk.className}`}
+            >
+              Create
+            </Button>
+          </div>
+        </div> */}

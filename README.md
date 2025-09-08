@@ -1,36 +1,48 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Project Setup
 
-First, run the development server:
+# BACKEND
+First, go to omnify_mini_event_management_system_backend and set below mentioned keys in the .env to start node.js, express.js server.
 
+.env Keys:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="YOUR_POSTGRES_DB_URL"
+PORT=4000 # Set it as it is this is the port where your backend is running.
+FRONTEND_URL="http://localhost:3000" # or the port where frontend is running to enable cors.
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+After this run below commands one by one to start the dev server:
+```bash
+npm install
+npx prisma migrate dev --name setup #to setup prisma orm
+npx prisma generate #to generate prisma client
+npm run build && npm run start # to start backend api server
+npm run docs #to setup and see the swagger api docs
+npx prisma studio # to see the db content as a db studio in you browser on default port: http://localhost:5555
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# FRONTEND
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Now go to omnify_mini_event_management_system folder and set keys.
 
-## Learn More
+.env Keys: 
+```bash
+NEXT_API_BASE_URL: # in here put the main url such as http://localhost:4000/api
+```
 
-To learn more about Next.js, take a look at the following resources:
+After this run below command to start the frontend:
+```bash
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Then you can access the frontend on: http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech stack
+Frontend: Next, Tailwind, Axios, Shadcn-ui, React Query
+Backend: Node, Express, Typescript, Prisma ORM, Supabase (As PostgreSQL Provider)
 
-## Deploy on Vercel
+## Video Link:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[Loom](https://www.loom.com/share/79651b886864416c8f4969f18b431a44?sid=a3b0c985-7618-4342-80f3-f810cfe1076f)
