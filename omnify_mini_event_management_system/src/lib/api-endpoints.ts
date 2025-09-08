@@ -1,5 +1,5 @@
 export const getApiBaseUrl = (): string => {
-  return "http://localhost:4000/api";
+  return process.env.NEXT_API_BASE_URL ||"http://localhost:4000/api";
 };
 
 export const API_BASE_URL = `${getApiBaseUrl()}/api/v1`;

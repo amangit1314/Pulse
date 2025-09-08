@@ -40,8 +40,8 @@ npm run dev
 Then you can access the frontend on: http://localhost:3000
 
 ## Tech stack
-Frontend: Next, Tailwind, Axios, Shadcn-ui, React Query
-Backend: Node, Express, Typescript, Prisma ORM, Supabase (As PostgreSQL Provider)
+### Frontend: Next, Tailwind, Axios, Shadcn-ui, Zustand, React Query
+### Backend: Node, Express, Typescript, Prisma ORM, Supabase (As PostgreSQL Provider)
 
 ## Video Link:
 
