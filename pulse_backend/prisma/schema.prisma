@@ -1,0 +1,574 @@
+// Pulse - AI Event Marketplace Platform
+// Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+enum UserRole {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  GITHUB
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String?       // Null for OAuth users
+  name          String
+  avatar        String?
+  bio           String?
+  role          UserRole      @default(USER)
+  authProvider  AuthProvider  @default(EMAIL)
+  emailVerified Boolean       @default(false)
+  isActive      Boolean       @default(true)
+  
+  // Location preferences
+  city          String?
+  country       String?
+  latitude      Float?
+  longitude     Float?
+  radius        Int?          @default(50) // Search radius in km
+  
+  // Preferences
+  interests     String[]      // Array of category IDs or tags
+  language      String        @default("en")
+  timezone      String        @default("UTC")
+  currency      String        @default("USD")
+  
+  // Notification preferences
+  emailNotifications    Boolean @default(true)
+  pushNotifications     Boolean @default(true)
+  eventReminders        Boolean @default(true)
+  marketingEmails       Boolean @default(false)
+  
+  // Points & Rewards
+  rewardPoints  Int           @default(0)
+  referralCode  String        @unique @default(cuid())
+  referredBy    String?
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  bookings          Booking[]
+  reviews           Review[]
+  notifications     Notification[]
+  rewards           Reward[]
+  organizations     OrganizationMember[]
+  ownedOrganizations Organization[] @relation("OrganizationOwner")
+  socialConnections  SocialConnection[]
+  wishlist          WishlistItem[]
+  
+  @@index([email])
+  @@index([latitude, longitude])
+  @@index([referralCode])
+}
+
+model SocialConnection {
+  id          String   @id @default(cuid())
+  userId      String
+  followerId  String
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, followerId])
+  @@index([userId])
+  @@index([followerId])
+}
+
+// ============================================================================
+// ORGANIZATION MANAGEMENT
+// ============================================================================
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  TRIAL
+}
+
+model Organization {
+  id            String             @id @default(cuid())
+  name          String
+  slug          String             @unique
+  description   String?
+  logo          String?
+  coverImage    String?
+  website       String?
+  email         String
+  phone         String?
+  
+  // Location
+  address       String?
+  city          String?
+  country       String?
+  
+  // Branding
+  primaryColor  String?
+  secondaryColor String?
+  
+  // Subscription
+  subscription  SubscriptionPlan   @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  subscriptionEndsAt DateTime?
+  
+  // Features enabled
+  aiFeatures    Boolean            @default(false)
+  virtualMeetups Boolean           @default(false)
+  customBranding Boolean           @default(false)
+  analytics     Boolean            @default(true)
+  
+  ownerId       String
+  isVerified    Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  
+  // Relations
+  owner         User               @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  members       OrganizationMember[]
+  events        Event[]
+  payments      Payment[]
+  
+  @@index([slug])
+  @@index([ownerId])
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model OrganizationMember {
+  id             String           @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrganizationRole @default(MEMBER)
+  joinedAt       DateTime         @default(now())
+  
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+// ============================================================================
+// EVENT MANAGEMENT
+// ============================================================================
+
+enum EventType {
+  IN_PERSON
+  VIRTUAL
+  HYBRID
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum TicketSource {
+  INTERNAL      // Sold directly on platform
+  AFFILIATE     // External ticketing (Eventbrite, etc.)
+}
+
+model Event {
+  id            String       @id @default(cuid())
+  title         String
+  slug          String       @unique
+  description   String       @db.Text
+  shortDescription String?
+  coverImage    String?
+  images        String[]
+  videoUrl      String?
+  
+  // Event details
+  eventType     EventType
+  status        EventStatus  @default(DRAFT)
+  
+  // Location (for in-person/hybrid events)
+  venue         String?
+  address       String?
+  city          String?
+  country       String?
+  latitude      Float?
+  longitude     Float?
+  
+  // Virtual event details
+  meetingUrl    String?
+  meetingId     String?
+  
+  // Timing
+  startTime     DateTime
+  endTime       DateTime
+  timezone      String       @default("UTC")
+  
+  // Capacity
+  maxCapacity   Int?
+  currentCapacity Int        @default(0)
+  
+  // Ticketing
+  ticketSource  TicketSource @default(INTERNAL)
+  affiliateUrl  String?      // External ticket URL
+  affiliateCode String?      // Tracking code
+  
+  // Pricing (in cents)
+  isFree        Boolean      @default(false)
+  basePrice     Int?         // Base ticket price
+  currency      String       @default("USD")
+  
+  // SEO & Discovery
+  tags          String[]
+  featured      Boolean      @default(false)
+  trending      Boolean      @default(false)
+  
+  // Analytics
+  viewCount     Int          @default(0)
+  clickCount    Int          @default(0)
+  shareCount    Int          @default(0)
+  
+  // Organization
+  organizationId String?
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  publishedAt   DateTime?
+  
+  // Relations
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  categories    EventCategory[]
+  bookings      Booking[]
+  reviews       Review[]
+  virtualMeetup VirtualMeetup?
+  wishlistItems WishlistItem[]
+  
+  @@index([slug])
+  @@index([eventType])
+  @@index([status])
+  @@index([startTime])
+  @@index([latitude, longitude])
+  @@index([organizationId])
+  @@index([featured])
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  slug        String          @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int             @default(0)
+  
+  events      EventCategory[]
+  
+  @@index([slug])
+}
+
+model EventCategory {
+  eventId    String
+  categoryId String
+  
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@id([eventId, categoryId])
+  @@index([eventId])
+  @@index([categoryId])
+}
+
+// ============================================================================
+// BOOKING & PAYMENTS
+// ============================================================================
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+  COMPLETED
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  eventId         String
+  
+  // Ticket details
+  ticketQuantity  Int           @default(1)
+  ticketPrice     Int           // Price per ticket in cents
+  totalAmount     Int           // Total amount paid in cents
+  currency        String        @default("USD")
+  
+  status          BookingStatus @default(PENDING)
+  bookingCode     String        @unique // QR code / confirmation code
+  
+  // Payment
+  paymentId       String?       @unique
+  
+  // Metadata
+  attendeeInfo    Json?         // Additional attendee information
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  cancelledAt     DateTime?
+  
+  // Relations
+  user            User          @relation(fields: [userId], references: [id])
+  event           Event         @relation(fields: [eventId], references: [id])
+  payment         Payment?      @relation(fields: [paymentId], references: [id])
+  
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+  @@index([bookingCode])
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  BOOKING
+  SUBSCRIPTION
+  REWARD_REDEMPTION
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  amount            Int           // Amount in cents
+  currency          String        @default("USD")
+  status            PaymentStatus @default(PENDING)
+  type              PaymentType
+  
+  // Stripe details
+  stripePaymentId   String?       @unique
+  stripeCustomerId  String?
+  
+  // References
+  organizationId    String?
+  
+  metadata          Json?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  // Relations
+  organization      Organization? @relation(fields: [organizationId], references: [id])
+  bookings          Booking[]
+  
+  @@index([status])
+  @@index([organizationId])
+}
+
+// ============================================================================
+// VIRTUAL MEETUPS
+// ============================================================================
+
+enum MeetupStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+model VirtualMeetup {
+  id            String        @id @default(cuid())
+  eventId       String        @unique
+  
+  // Meeting details
+  roomId        String        @unique
+  accessCode    String?       // Optional access code for private meetings
+  maxParticipants Int?
+  
+  status        MeetupStatus  @default(SCHEDULED)
+  
+  // Features enabled
+  chatEnabled   Boolean       @default(true)
+  screenShareEnabled Boolean   @default(true)
+  recordingEnabled Boolean     @default(false)
+  transcriptionEnabled Boolean @default(false)
+  aiSummary     Boolean       @default(false)
+  
+  // Recording
+  recordingUrl  String?
+  recordingSize Int?          // Size in bytes
+  
+  // AI Generated Content
+  transcription String?       @db.Text
+  summary       String?       @db.Text
+  actionItems   Json?
+  
+  // Analytics
+  peakAttendance Int          @default(0)
+  totalMinutes  Int           @default(0)
+  
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  chatMessages  ChatMessage[]
+  
+  @@index([roomId])
+  @@index([status])
+}
+
+model ChatMessage {
+  id              String         @id @default(cuid())
+  meetupId        String
+  userId          String
+  userName        String         // Denormalized for performance
+  userAvatar      String?        // Denormalized for performance
+  message         String         @db.Text
+  messageType     String         @default("text") // text, system, file, etc.
+  
+  createdAt       DateTime       @default(now())
+  
+  meetup          VirtualMeetup  @relation(fields: [meetupId], references: [id], onDelete: Cascade)
+  
+  @@index([meetupId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// REVIEWS & RATINGS
+// ============================================================================
+
+model Review {
+  id          String   @id @default(cuid())
+  userId      String
+  eventId     String
+  rating      Int      // 1-5 stars
+  comment     String?  @db.Text
+  verified    Boolean  @default(false) // Attended the event
+  helpful     Int      @default(0)      // Helpful count
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([rating])
+}
+
+// ============================================================================
+// REWARDS & GAMIFICATION
+// ============================================================================
+
+enum RewardType {
+  REFERRAL
+  BOOKING
+  REVIEW
+  ATTENDANCE
+  SPECIAL
+}
+
+model Reward {
+  id          String     @id @default(cuid())
+  userId      String
+  type        RewardType
+  points      Int
+  description String
+  metadata    Json?
+  
+  createdAt   DateTime   @default(now())
+  expiresAt   DateTime?
+  
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+}
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  EVENT_REMINDER
+  EVENT_UPDATE
+  EVENT_CANCELLED
+  REVIEW_RECEIVED
+  REWARD_EARNED
+  SUBSCRIPTION_EXPIRING
+  NEW_FOLLOWER
+  SYSTEM
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  link        String?
+  read        Boolean          @default(false)
+  metadata    Json?
+  
+  createdAt   DateTime         @default(now())
+  
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// WISHLIST
+// ============================================================================
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, eventId])
+  @@index([userId])
+}
+

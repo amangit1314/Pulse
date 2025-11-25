@@ -1,0 +1,53 @@
+## Requirements
+
+I want this platform to be a ai based saas event marketplace where:
+- User auth
+- User profile and location selection
+- User purchases and rewards
+- Organization dashboard
+- Event listing (of available events near your location)
+- Event details
+- Event ticket purchase / booking via affiliate links (eventbrite type apis)
+   = where user can see the event details and purchase the ticket via click on purchase and will be redirected to the original website who is selling the tickets and we will get the affiliate income.
+- For organizations, there will be
+   = organization registeration
+   = can organize virtual meetup kind of events (discord / google meet meets)
+   = meetup will have the chat, sharing and all meeting application feature with some ai features unlocked by purchasing subscription
+   = meets can be free / paid as the suitability of organization
+   = for unlock all capability, organizations will pay to purchase enterprise subscription plan
+
+
+   Antigravity suggested:
+   For Users:
+AI Event Recommendations - Smart suggestions based on interests, past attendance, location
+Social Features - Follow friends, share events, create event groups
+Calendar Integration - Sync with Google/Apple Calendar
+Event Reminders - Smart notifications (AI-optimized timing)
+Reviews & Ratings - Rate events and organizers
+Wishlist & Collections - Save favorite events
+Referral System - Earn rewards for inviting friends
+Multi-language Support - Global reach
+Accessibility Features - Screen reader support, high contrast modes
+Event History & Analytics - Personal attendance insights
+Networking Features - Connect with other attendees before/after events
+For Organizations:
+AI-Powered Analytics Dashboard - Attendance predictions, optimal pricing, best posting times
+Event Templates - Quick event creation
+Bulk Operations - Manage multiple events
+Custom Branding - White-label meeting rooms
+Recording & Transcription - AI-powered meeting notes
+Polls & Surveys - Built-in engagement tools
+Sponsor Management - Track and manage event sponsors
+Email Campaign Builder - Integrated marketing tools
+Attendee Management - Check-in, badges, certificates
+Real-time Analytics - Live event metrics
+Platform-Wide:
+AI Chatbot - 24/7 customer support
+Dynamic Pricing - AI-optimized event pricing suggestions
+Fraud Detection - AI-powered security
+Multi-currency & Payment Methods - Stripe, PayPal, crypto
+SEO Optimization - Better event discoverability
+Progressive Web App (PWA) - Install on mobile devices
+Real-time Notifications - WebSocket-powered updates
+Advanced Search & Filters - AI-powered semantic search
+Content Moderation - AI-powered spam/abuse detection
